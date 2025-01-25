@@ -1,43 +1,31 @@
-# Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11
+CXX = g++
+CFLAGS = -Wall -Wextra -std=c11 -O2
+CXXFLAGS = -Wall -Wextra -std=c++11 -O2
 
-# Directories
-SRC_DIR = src
-BIN_DIR = bin
-OBJ_DIR = obj
+SRC_C = src/customHashMap/HashMap.c src/customHashMap/Tree.c src/utils/helper.c src/customHashMap/Application.c src/main.c
+SRC_CPP = src/libhashmap/Application.cpp
+OBJ_C = $(SRC_C:src/%.c=obj/%.o)
+OBJ_CPP = $(SRC_CPP:src/%.cpp=obj/%.o)
+OBJ = $(OBJ_C) $(OBJ_CPP)
+BIN = bin/hashmap_tree_comparison
 
-# Output binary
-TARGET = $(BIN_DIR)/application
+all: $(BIN)
 
-# Source files and object files
-SRCS = main.c $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(patsubst %.c, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))
+$(BIN): $(OBJ)
+	mkdir -p bin
+	$(CXX) $(OBJ) -o $@
 
-# Default rule
-all: setup $(TARGET)
-
-# Create necessary directories
-setup:
-	mkdir -p $(BIN_DIR) $(OBJ_DIR)
-
-# Compile the application
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
-
-# Compile source files into object files
-$(OBJ_DIR)/%.o: %.c
+obj/%.o: src/%.c
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+obj/%.o: src/%.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Clean build files
+run: all
+	./$(BIN)
+
 clean:
-	rm -rf $(BIN_DIR) $(OBJ_DIR)
-
-# Run the application
-run: $(TARGET)
-	./$(TARGET)
-
-.PHONY: all setup clean run
+	rm -rf obj bin logs/*.log
